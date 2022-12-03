@@ -8,7 +8,7 @@ integração  Mk-auth com Mikrotik
 ### 1º Passo: Configurando PPTP-CLIENT VPN DE COMUNICAÇÃO
 
 ```bash
-interface pptp-client add name=Mk-Auth01 connect-to=IP user=mkauth1 password=123456
+interface pptp-client add name=Mk-Auth01 connect-to=IP user=mkauth1 password=123456 disabled=no
 ```
 
 ### 2º Configurando Radius Cliente
