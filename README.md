@@ -17,3 +17,7 @@ radius remove numbers=0
 radius add address=172.20.1.1 secret=123456 service=ppp comment=Ramaul-01
 radius incoming set accept=yes
 ```
+
+### 3º Criar Usuario mk-auth para comunicação SSH
+user remove mkauth
+user add name=mkauth password=123456 address=172.20.1.0/24 group=full
