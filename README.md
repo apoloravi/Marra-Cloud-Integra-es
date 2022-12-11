@@ -23,3 +23,8 @@ radius incoming set accept=yes
 user remove mkauth
 user add name=mkauth password=123456 address=172.20.1.0/24 group=full
 ```
+
+### 4º Baixando Chave.pub para inserir no user Mk-auth
+tool fetch http-method=get url=http://172.20.1.1/admin/chave.pub
+
+### 5º Inserindio chave.pub em user Mk-auth SSH-Keys
