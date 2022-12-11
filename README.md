@@ -19,5 +19,7 @@ radius incoming set accept=yes
 ```
 
 ### 3º Criar Usuario mk-auth para comunicação SSH
+```bash
 user remove mkauth
 user add name=mkauth password=123456 address=172.20.1.0/24 group=full
+```
