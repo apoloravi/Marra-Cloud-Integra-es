@@ -9,6 +9,7 @@ integração  Mk-auth com Mikrotik
 
 ```bash
 git clone https://github.com/apoloravi/Marra-Cloud-Integracoes.git
+chmod +x Marra-Cloud-Integracoes/integracoes.sh
 ./Marra-Cloud-Integracoes/integracoes.sh
 ```
 
