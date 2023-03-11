@@ -2,36 +2,33 @@
 
 echo "Iniciando integração entre Mikrotik e Mk-auth..."
 
-# Configuração da VPN PPTP
 echo "Configurando VPN PPTP..."
-# Comandos para configurar a VPN PPTP no Mikrotik
-
-# Acessando o Mikrotik via SSH
-echo "Acessando o Mikrotik via SSH..."
-ssh -o StrictHostKeyChecking=no admin@172.20.1.2 -p 2215 << EOF
-    # Criando usuário no Mikrotik
-    echo "Criando usuário no Mikrotik..."
-    /user add name=mkauth password=123456 group=full permissions=172.20.1.0/24,$(echo "ip route get 1" | awk '{print $NF;exit}') comment="Usuário para integração com Mk-auth"
-
-    # Configurando o Radius no Mikrotik
-    echo "Configurando o Radius no Mikrotik..."
-    /radius add service=ppp address=172.20.1.1 secret=123456
-
-    # Baixando o arquivo chave.pub do Mk-auth
-    echo "Baixando o arquivo chave.pub do Mk-auth..."
-    /tool fetch url=http://172.20.1.1/admin/chave.pub mode=http dst-path=chave.pub
-
-    # Importando o arquivo chave.pub no Mikrotik
-    echo "Importando o arquivo chave.pub no Mikrotik..."
-    /user ssh-keys import file-name=chave.pub user=mkauth
-
-    # Configurando permissões de IP para o usuário mkauth
-    echo "Configurando permissões de IP para o usuário mkauth..."
-    /user group set name=full policy=telnet,ssh,ftp,reboot,read,write,test,winbox,password,web,sniff,sensitive,api,romon,dude,tikapp local-address=172.20.1.0/24 remote-address=$(echo "ip route get 1" | awk '{print $NF;exit}')
-
-    # Permitindo o uso do Radius no ppp secret
-    echo "Permitindo o uso do Radius no ppp secret..."
-    /ppp secret set default use-radius=yes
+sshpass -p 'senhaadmin' ssh -o StrictHostKeyChecking=no admin@172.20.1.2 << EOF
+    /interface pptp-client
+    add connect-to=172.20.1.1 disabled=no name=mk-auth password=123456 user=mkauth
 EOF
 
-echo "Integração finalizada."
+echo "Acessando o Mikrotik via SSH..."
+sshpass -p 'senhaadmin' ssh -o StrictHostKeyChecking=no admin@172.20.1.2 << EOF
+    echo "Criando usuário no Mikrotik..."
+    /user add name=mkauth group=full password=123456
+    echo "Configurando o Radius no Mikrotik..."
+    /radius incoming set accept=yes
+    echo "Baixando o arquivo chave.pub do Mk-auth..."
+    /tool fetch url="http://172.20.1.1/admin/chave.pub" mode=http
+    echo "Importando o arquivo chave.pub no Mikrotik..."
+    /user ssh-keys import user=mkauth public-key-file=chave.pub
+    echo "Configurando permissões de IP para o usuário mkauth..."
+    /user group set name=full policy="local,telnet,ssh,ftp,reboot,read,write,test,winbox,password,web,sniff,sensitive,api,!ftp,!telnet,!ssh,!reboot,!read,!write,!test,!winbox,!password,!web,!sniff,!sensitive,!api" policies="" users=mkauth
+    /user group set name=read policy="local,telnet,ssh,!ftp,!reboot,read,test,winbox,!password,!web,!sniff,!api" policies="" users=""
+    /user group set name=write policy="local,telnet,ssh,!ftp,!reboot,!read,write,test,winbox,!password,!web,!sniff,!api" policies="" users=""
+    /user group set name=webadmin policy="local,!telnet,!ssh,!ftp,!reboot,!read,!write,!test,!winbox,!password,web,!sniff,!api" policies="" users=""
+    /user group set name=ftpadmin policy="local,telnet,ssh,ftp,!reboot,!read,!write,!test,winbox,!password,!web,!sniff,!api" policies="" users=""
+    /user group set name=vpn policy="local,!telnet,!ssh,!ftp,!reboot,!read,!write,!test,!winbox,!password,!web,!sniff,!api" policies="" users=""
+    /user group set name=guest policy="local,!telnet,!ssh,!ftp,!reboot,!read,!write,!test,!winbox,!password,!web,!sniff,!api" policies="" users=""
+    /user ssh-keys set user=mkauth value-name=ip-address value=172.20.1.0/24
+    /user ssh-keys set user=mkauth value-name=ip-address value=$(echo /interface pptp-client print | sshpass -p 'senhaadmin' ssh admin@172.20.1.2 | awk -F "=" '/connect-to/{print $2}' | awk -F "/" '{print $1}')
+EOF
+
+echo "Permitindo o uso do Radius no ppp secret..."
+sshpass -p 'senhaadmin' ssh -o StrictHostKeyChecking=no admin@172.20.1.2 << EOF
