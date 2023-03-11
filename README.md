@@ -10,8 +10,8 @@ integração  Mk-auth com Mikrotik
 ```bash
 git clone https://github.com/apoloravi/Marra-Cloud-Integracoes.git
 cd Marra-Cloud-Integracoes/
-chmod +x integracoes.sh
-./integracoes.sh
+chmod +x integracao.sh
+./integracao.sh
 ```
 
 ### 2º Ele vai pedir a senha do admin do seu mikrotik
